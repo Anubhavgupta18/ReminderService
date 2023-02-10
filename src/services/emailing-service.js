@@ -1,4 +1,5 @@
 const sender = require('../config/emailConfig');
+const { EMAIL_ID } = require('../config/serverConfig');
 const ticketRepository = require('../repository/ticket-repository');
 
 const repo = new ticketRepository();
@@ -41,10 +42,29 @@ const updateTicket = async (ticketId,data) => {
         throw error;
     }
 }
+const subscribeEvents = async (payload) => {
+    try {
+        const data = payload.data;
+        const service = payload.service;
+        service.forEach(element => {
+            if (element == 'CREATE_TICKET')
+            {
+                createNotification(data);
+            }
+            if (element == 'SEND_MAIL')
+            {
+                sendMail(EMAIL_ID,data.recepientEmail, data.subject, data.content);
+            }
+        });
+    } catch (error) {
+        throw error;
+    }
+}
 
 module.exports = {
     sendMail,
     fetchPendingEmails,
     createNotification,
-    updateTicket
+    updateTicket,
+    subscribeEvents
 }
